@@ -13,3 +13,5 @@ UserID::MovieID::Rating::Timestamp
 - Ratings are made on a 5-star scale (whole-star ratings only)
 - Timestamp is represented in seconds since the epoch as returned by time(2)
 - Each user has at least 20 ratings
+
+most_similar.dat is the text file that contains top 100 most similar movies for every movie (after running on my code).
