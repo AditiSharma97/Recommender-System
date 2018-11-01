@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>Collabarative_Filtering.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>Collabarative_Filtering.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="o">//</span><span class="err">!</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python3</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">heapq</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="o">//</span> <span class="o">===</span> <span class="n">Collaborative</span> <span class="n">Filtering</span> <span class="o">===</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">RecommenderSystems</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>	<span class="k">def</span> <span class="fm">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">print</span> <span class="p">(</span><span class="s2">&quot;in constructor&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>The ratings data is loaded from the file ratings.dat and is stripped and stored in a ratings matrix.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>	<span class="k">def</span> <span class="nf">loadData</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>		<span class="n">ratings_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;./ratings/ratings.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span> <span class="p">((</span><span class="mi">3952</span><span class="p">,</span> <span class="mi">6040</span><span class="p">))</span>
+		<span class="o">//</span><span class="k">print</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="p">)</span>
+	
+		<span class="k">for</span> <span class="n">rating</span> <span class="ow">in</span> <span class="n">ratings_file</span><span class="p">:</span>
+			<span class="n">data</span> <span class="o">=</span> <span class="n">rating</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;::&#39;</span><span class="p">)</span>
+			<span class="o">//</span><span class="k">print</span> <span class="p">(</span><span class="n">data</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+			<span class="o">//</span><span class="k">print</span> <span class="p">(</span><span class="n">ratings_matrix</span><span class="p">)</span>
+	
+		<span class="n">ratings_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>Data is preprocessed for collaborative filtering. Transpose of the ratings matrix, sum of users and movies, and other necessary variables are calculated, which are needed for the algorithm.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>	<span class="k">def</span> <span class="nf">preprocessing</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>		<span class="bp">self</span><span class="o">.</span><span class="n">transpose_ratings_matrix</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">transpose</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">movie_sums</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">movie_non_zeros</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">movie_means</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">movie_sums</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+		
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">movie_sums</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">movie_non_zeros</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">movie_means</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">movie_sums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">movie_non_zeros</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">user_sums</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transpose_ratings_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">user_non_zeros</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transpose_ratings_matrix</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">user_means</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_sums</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_sums</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_non_zeros</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">user_means</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_sums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_non_zeros</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>Further calculations for collaborative filtering algorithm are done. Norm ratings matrix is the normalised ratings matrix, obtained after subtracting movie means from every rating and dividing by the magnitude of the movie vector. For each movie,          100 most similar movies are stored in the most_similar.dat file.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>	<span class="k">def</span> <span class="nf">preprocessCollaborativeFiltering</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>		<span class="n">magnitudes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">movie_sums</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+		<span class="n">norm_ratings_matrix</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+	
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+			<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+					<span class="n">norm_ratings_matrix</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">movie_means</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+					<span class="n">magnitudes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">norm_ratings_matrix</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">norm_ratings_matrix</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+		
+			<span class="n">magnitudes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">magnitudes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+			
+			<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+				<span class="k">if</span> <span class="n">magnitudes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
+					<span class="n">norm_ratings_matrix</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_ratings_matrix</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">/</span> <span class="n">magnitudes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+		<span class="n">similarities</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+		<span class="n">most_similar</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">100</span><span class="p">))</span>
+
+		<span class="n">most_similar_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;./ratings/most_similar.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+		<span class="k">print</span> <span class="p">(</span><span class="s2">&quot;opened&quot;</span><span class="p">)</span>
+
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+			<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">norm_ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+				<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">norm_ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+					<span class="n">similarities</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">norm_ratings_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">norm_ratings_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">]</span>				
+			<span class="n">similarities</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">similarities</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+			<span class="n">most_similar</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">nlargest</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">similarities</span><span class="p">[</span><span class="n">i</span><span class="p">])),</span> <span class="n">similarities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">take</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="k">print</span> <span class="p">(</span><span class="n">most_similar</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+			<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">):</span>
+				<span class="n">write_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;::&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;::&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">most_similar</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]))</span> <span class="o">+</span> <span class="s1">&#39;::&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">similarities</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">most_similar</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+				<span class="n">most_similar_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">write_string</span><span class="p">)</span>
+
+		<span class="n">most_similar_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>Collaborative filtering algorithm is implemented here. The most_similar.dat file is created the first time, after which it is loaded directly for further runs. Rmse, precision at 10 and spearman rank correlation values are calculated for collaborative         filtering and collaborative filtering with baseline approach and displayed on the terminal.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>	<span class="k">def</span> <span class="nf">colab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>		<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+		<span class="o">//</span> <span class="n">If</span> <span class="n">preprocessed</span> <span class="nb">file</span> <span class="n">doesn</span><span class="s1">&#39;t exist, create it</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;./ratings/most_similar.dat&#39;</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">preprocessCollaborativeFiltering</span><span class="p">()</span>
+
+		<span class="o">//</span> <span class="n">Load</span> <span class="n">the</span> <span class="n">preprocessed</span> <span class="nb">file</span>
+		<span class="n">most_similar_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;./ratings/most_similar.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+		<span class="n">similarities</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+		<span class="n">top_100</span> <span class="o">=</span> <span class="p">{}</span>
+
+		<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">most_similar_file</span><span class="p">:</span>
+			<span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;::&#39;</span><span class="p">)</span>
+			<span class="n">i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+			<span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+			<span class="n">s</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+		    
+			<span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">top_100</span><span class="p">:</span>
+				<span class="n">top_100</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+			<span class="n">top_100</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+			<span class="n">similarities</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+
+		<span class="n">most_similar_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+		<span class="n">guesses</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">400</span><span class="p">,</span> <span class="mi">400</span><span class="p">))</span>
+		<span class="n">baseline_guesses</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">400</span><span class="p">,</span> <span class="mi">400</span><span class="p">))</span>
+
+		<span class="n">rmse</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">baseline_rmse</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">values_tested</span> <span class="o">=</span> <span class="mi">0</span>
+
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">400</span><span class="p">):</span>
+			<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">400</span><span class="p">):</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+					<span class="n">values_tested</span> <span class="o">+=</span> <span class="mi">1</span>
+					<span class="n">simsum</span> <span class="o">=</span> <span class="mf">0.0</span>
+					<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">top_100</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+						<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+							<span class="n">guesses</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">similarities</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+							<span class="n">baseline_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">movie_means</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_means</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+							<span class="n">baseline_guesses</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">baseline_score</span><span class="p">)</span> <span class="o">*</span> <span class="n">similarities</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+							<span class="n">simsum</span> <span class="o">+=</span> <span class="n">similarities</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+					<span class="k">if</span> <span class="n">simsum</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
+						<span class="n">guesses</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">/=</span> <span class="n">simsum</span>
+						<span class="n">baseline_guesses</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">/=</span> <span class="n">simsum</span>
+					<span class="n">baseline_guesses</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">movie_means</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_means</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+					<span class="n">guess_error</span> <span class="o">=</span> <span class="n">guesses</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+					<span class="n">rmse</span> <span class="o">+=</span> <span class="n">guess_error</span> <span class="o">**</span> <span class="mi">2</span>
+					<span class="n">baseline_guess_error</span> <span class="o">=</span> <span class="n">baseline_guesses</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratings_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+					<span class="n">baseline_rmse</span> <span class="o">+=</span> <span class="n">baseline_guess_error</span> <span class="o">**</span> <span class="mi">2</span>
+
+		<span class="n">rmse</span> <span class="o">/=</span> <span class="n">values_tested</span>
+		<span class="n">rho</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">6</span> <span class="o">/</span> <span class="p">(</span><span class="n">values_tested</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">rmse</span>
+		<span class="n">rmse</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rmse</span><span class="p">)</span>
+		<span class="n">baseline_rmse</span> <span class="o">/=</span> <span class="n">values_tested</span>
+		<span class="n">baseline_rho</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">6</span> <span class="o">/</span> <span class="p">(</span><span class="n">values_tested</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">baseline_rmse</span>
+		<span class="n">baseline_rmse</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">baseline_rmse</span><span class="p">)</span>
+
+		<span class="n">t_guesses</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">guesses</span><span class="p">)</span>
+		<span class="n">t_baseline_guesses</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">baseline_guesses</span><span class="p">)</span>
+
+		<span class="n">precision_at_10</span> <span class="o">=</span> <span class="mf">0.0</span>
+		<span class="n">baseline_precision_at_10</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">400</span><span class="p">):</span>
+			<span class="n">top_10</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">nlargest</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">400</span><span class="p">),</span> <span class="n">t_guesses</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">take</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">top_10</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="mf">3.5</span><span class="p">:</span>
+					<span class="n">precision_at_10</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="n">top_10</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">nlargest</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">400</span><span class="p">),</span> <span class="n">t_baseline_guesses</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">take</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">top_10</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="mf">3.5</span><span class="p">:</span>
+					<span class="n">baseline_precision_at_10</span> <span class="o">+=</span> <span class="mi">1</span>
+
+		<span class="n">precision_at_10</span> <span class="o">/=</span> <span class="mi">4000</span>
+		<span class="n">baseline_precision_at_10</span> <span class="o">/=</span> <span class="mi">4000</span>
+
+		<span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Collaborative</span><span class="se">\t\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+		<span class="k">print</span> <span class="p">(</span><span class="s1">&#39;{0:.3f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rmse</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+		<span class="k">print</span> <span class="p">(</span><span class="s1">&#39;{0:.3f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">precision_at_10</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;%</span><span class="se">\t\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+		<span class="k">print</span> <span class="p">(</span><span class="s1">&#39;{0:.6f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\t\t\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+		<span class="k">print</span> <span class="p">(</span><span class="s1">&#39;{0:.3f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+		<span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Baseline Collaborative</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+		<span class="k">print</span> <span class="p">(</span><span class="s1">&#39;{0:.3f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">baseline_rmse</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+		<span class="k">print</span> <span class="p">(</span><span class="s1">&#39;{0:.3f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">baseline_precision_at_10</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;%</span><span class="se">\t\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+		<span class="k">print</span> <span class="p">(</span><span class="s1">&#39;{0:.6f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">baseline_rho</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+	<span class="n">obj</span> <span class="o">=</span> <span class="n">RecommenderSystems</span><span class="p">()</span>
+	<span class="n">obj</span><span class="o">.</span><span class="n">loadData</span><span class="p">()</span>
+	<span class="n">obj</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
+	<span class="n">obj</span><span class="o">.</span><span class="n">colab</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">main</span><span class="p">()</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>
